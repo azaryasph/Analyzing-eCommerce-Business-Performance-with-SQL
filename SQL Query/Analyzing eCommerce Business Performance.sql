@@ -1,5 +1,7 @@
--- ===Mini Project 1 SQL QUERRY=== -
-TASK 1
+-- Mini Project 1 SQL QUERRY Create Table and ERD --
+-- =============================================
+--         Create Table and ERD Section
+-- =============================================
 
 -- Table Customers
 CREATE TABLE customers(
@@ -38,7 +40,6 @@ CREATE TABLE order_payments(
   payment_installments INT,
   payment_value DOUBLE PRECISION
 );
-
 
 -- Table Order Reviews
 CREATE TABLE order_reviews(
@@ -88,18 +89,6 @@ CREATE TABLE sellers(
 ALTER TABLE customers
 ADD PRIMARY KEY(customer_id);
 
--- Remove duplicate on geolocation_zip_code_prefix column from geolocation table
-DELETE FROM geolocation
-WHERE ctid NOT IN (
-    SELECT min(ctid)
-    FROM geolocation
-    GROUP BY geolocation_zip_code_prefix
-);
-
--- Set Primary key for geolocation_zip_code_Prefix
-ALTER TABLE geolocation
-ADD PRIMARY KEY (geolocation_zip_code_prefix);
-
 -- Set Primary key for product_id
 ALTER TABLE product
 ADD PRIMARY KEY (product_id);
@@ -123,7 +112,6 @@ ALTER TABLE order_payments
 ADD CONSTRAINT fk_order_payments
 FOREIGN KEY(order_id)
 REFERENCES orders;
-
 
 -- Set Foreign Key orders(customer_id)
 ALTER TALBLE orders
@@ -149,6 +137,18 @@ ADD CONSTRAINT fk_order_seller
 FOREIGN KEY(seller_id)
 REFERENCES sellers
 
+-- Remove duplicate on geolocation_zip_code_prefix column from geolocation table so we can set them as primary key
+DELETE FROM geolocation
+WHERE ctid NOT IN (
+    SELECT min(ctid)
+    FROM geolocation
+    GROUP BY geolocation_zip_code_prefix
+);
+
+-- Set Primary key for geolocation_zip_code_Prefix
+ALTER TABLE geolocation
+ADD PRIMARY KEY (geolocation_zip_code_prefix);
+
 -- Insert values on Primary key in order to set seller_zip_code_prefix as foreign key
 INSERT INTO geolocation (geolocation_zip_code_prefix)
 SELECT DISTINCT seller_zip_code_prefix
@@ -163,6 +163,7 @@ ALTER TABLE sellers
 ADD CONSTRAINT fk_sellers
 FOREIGN KEY(seller_zip_code_prefix)
 REFERENCES geolocation;
+
 
 -- To set customer_zip_code_prefix as foreign key, i have to insert values to geolocation
 INSERT INTO geolocation (geolocation_zip_code_prefix)
@@ -179,37 +180,15 @@ ADD CONSTRAINT fk_customers_geo
 FOREIGN KEY(customer_zip_code_prefix)
 REFERENCES geolocation;
 
+-- ====== Create Table and ERD Done ======
 
 
+-- =============================================
+--   Annual Customer Activity Growth Analysis
+-- =============================================
 
+-- 1. Average annual monthly active customer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-TASK 2
--- NO.1 rata-rata jumlah customer aktif bulanan (monthly active user) untuk setiap tahun
-/*
 SELECT 
 	years,
 	ROUND(AVG(monthly_customer_active))avg_monthly_cust_active
@@ -224,10 +203,10 @@ FROM(
 )subq
 GROUP BY 1
 ORDER BY 1;
-*/
 
--- NO.2 Menampilkan jumlah customer baru pada masing-masing tahun (Hint: Pelanggan baru adalah pelanggan yang melakukan order pertama kali)
-/*
+
+-- 2. Displaying the number of new customers each year
+
 SELECT
 	years,
 	COUNT(count_new_customer) new_customer_peryear
@@ -244,10 +223,9 @@ FROM(
 )subq
 GROUP BY 1
 ORDER BY 1
-*/
 
--- NO.3 Menampilkan jumlah customer yang melakukan pembelian lebih dari satu kali (repeat order) pada masing-masing tahun (Hint: Pelanggan yang melakukan repeat order adalah pelanggan yang melakukan order lebih dari 1 kali)
-/*
+-- 3. Displaying the number of customers who made more than one purchase (repeat order) in each year
+
 SELECT 
 	years,
 	COUNT(order_id) repeat_order_customer
@@ -269,10 +247,9 @@ FROM(
 	HAVING COUNT(order_purchase_timestamp) > 1
 )subq2
 GROUP BY 1;
-*/
 
--- NO.4 Menampilkan rata-rata jumlah order yang dilakukan customer untuk masing-masing tahun (Hint: Hitung frekuensi order (berapa kali order) untuk masing-masing customer terlebih dahulu)
-/*
+-- 4. Displaying the average number of orders made by customers for each year
+
 SELECT 
 	years,
 	ROUND(AVG(cust_order_freq),2) avg_order_frequency_peryear
@@ -288,9 +265,8 @@ FROM(
 )subq
 GROUP BY 1
 ORDER BY 1;
-*/
 
--- NO.5 Menggabungkan ketiga metrik yang telah berhasil ditampilkan menjadi satu tampilan tabel
+-- 5. Combine the three metrics that have been successfully displayed into one table view
 
 SELECT 
 	COALESCE(roc.years, aop.years) years,
@@ -389,34 +365,11 @@ FROM(
 ) aop
 ON roc.years = aop.years;
 
+-- =============================================
+--   Annual Product Category Quality Analysis
+-- =============================================
+-- 1. Create a table that contains information on the company's total revenue for each year.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-TASK 3
--- NO.1 Membuat tabel yang berisi informasi pendapatan/revenue perusahaan total untuk masing-masing tahun
-/*
 CREATE TABLE revenues AS
 	SELECT 
 		EXTRACT(YEAR FROM od.order_purchase_timestamp) years,
@@ -426,11 +379,9 @@ CREATE TABLE revenues AS
 		ON oi.order_id = od.order_id
 	WHERE od.order_status IN ('delivered', 'shipped')
 	GROUP BY 1;
-*/
 
--- NO.2 Membuat tabel yang berisi informasi jumlah cancel order total untuk masing-masing tahun 
--- (Hint: Perhatikan filtering terhadap order status yang tepat untuk menghitung jumlah cancel order)
-/*
+-- 2. Create a table that contains information on the total number of cancelled orders for each year. 
+
 CREATE TABLE canceled_orders AS
 	SELECT 
 		EXTRACT(YEAR FROM od.order_purchase_timestamp) years,
@@ -440,11 +391,9 @@ CREATE TABLE canceled_orders AS
 		ON oi.order_id = od.order_id
 	WHERE order_status = 'canceled'
 	GROUP BY 1;
-*/
 
--- NO.3 Membuat tabel yang berisi nama kategori produk yang memberikan pendapatan total tertinggi untuk masing-masing tahun 
--- (Hint: Perhatikan penggunaan window function dan juga filtering yang dilakukan)
-/*
+-- 3. Create a table that contains the names of product categories that generate the highest total revenue for each year.
+
 CREATE TABLE highest_product_revenues AS
 	SELECT
 		years,
@@ -468,10 +417,9 @@ CREATE TABLE highest_product_revenues AS
 		ORDER BY 1, 4
 	) subq
 	WHERE ranking_revenue = 1;
-*/
 
--- NO.4 Membuat tabel yang berisi nama kategori produk yang memiliki jumlah cancel order terbanyak untuk masing-masing tahun
-/*
+-- 4. Create a table that contains the names of product categories that have the highest number of cancelled orders for each year.
+
 CREATE TABLE highest_canceled_product AS 
 	SELECT 
 		years,
@@ -493,9 +441,9 @@ CREATE TABLE highest_canceled_product AS
 		GROUP BY 1, 2
 	) subq
 	WHERE ranking_canceled = 1;
-*/
 
--- NO.5 Menggabungkan informasi-informasi yang telah didapatkan ke dalam satu tampilan tabel 
+-- 5 Combine the information that has been obtained into one table view.
+
 SELECT 
 	rv.years,
 	rv.revenue,
@@ -510,12 +458,15 @@ LEFT JOIN canceled_orders co
 LEFT JOIN highest_product_revenues hpr
 	ON rv.years = hpr.years
 LEFT JOIN highest_canceled_product hc
-	ON rv.years = hc.years
+	ON rv.years = hc.years;
 
 
--- TASK 4
--- NO.1 Display the all-time usage of each payment type, sorted from the most popular.
-/*
+-- =============================================
+--   	Annual Payment Type Usage Analysis
+-- =============================================
+
+-- 1. Display the total usage of each payment type of all time, sorted from the most popular. 
+
 SELECT 
     payment_type,
     payment_usage_count,
@@ -529,9 +480,8 @@ FROM
     GROUP BY payment_type
 ) subq1
 ORDER BY payment_usage_count DESC;
-*/
 
---NO.2 Display detailed information on the usage of each payment type for each year.
+-- 2. Display detailed information on the usage of each payment type for each year. 
 
 SELECT 
 	EXTRACT(YEAR FROM od.order_purchase_timestamp) years,
@@ -543,5 +493,3 @@ JOIN orders od
 	ON op.order_id = od.order_id
 GROUP BY 1, 2
 ORDER BY 1, 4;
-
-
