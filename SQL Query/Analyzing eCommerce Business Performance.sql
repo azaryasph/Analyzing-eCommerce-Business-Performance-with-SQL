@@ -23,7 +23,7 @@ CREATE TABLE geolocation(
 
 -- Table Order Items
 CREATE TABLE order_items(
-  order_id VARCHAR,,
+  order_id VARCHAR,
   order_item_id INT,
   product_id VARCHAR,
   seller_id VARCHAR ,
@@ -85,6 +85,48 @@ CREATE TABLE sellers(
   seller_state VARCHAR
 );
 
+-- import data to each table --
+COPY customers
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\customers_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY geolocation
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\geolocation_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY order_items
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\order_items_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY order_payments
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\order_payments_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY order_reviews
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\order_reviews_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY orders
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\orders_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY product
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\product_fix_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+COPY sellers
+FROM 'C:\Rakamin Academy\JAP\Minpro 1\Analyzing eCommerce Business Performance with SQL\data\sellers_dataset.csv'
+DELIMITER ',' 
+CSV HEADER;
+
+-- Set Primary Key & Foreign Key --
 --  Customer’s table Primary Key
 ALTER TABLE customers
 ADD PRIMARY KEY(customer_id);
